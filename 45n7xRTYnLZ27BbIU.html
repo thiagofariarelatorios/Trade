@@ -1,0 +1,245 @@
+<html><head><base href="https://tradingwebsim.com/personalized-multitimeframe-GPT-desk%20i%20need%206%20timeframes.%20no%20ticker%20on%20the%20charts%20.%20bigger%20chart%20with%20only%20rsi%20divergence.%20add%20relevant%20instruments%20datas%20%20into%20the%20side%20ba%20%20to%20analyse%20the%20current%20instrument%20on%20the%206%20charts.%20i%20need%20to%20see%20the%20current%20timeframe%20into%20the%20ticker%20desccription%20on%20each%20charts.%20add%20more%20instrument%20into%20the%20instrument%20selection%20menu%20.%20add%20more%20relevant%20data%20into%20relevant%20instrument%20data%20section.%20remove%20multitimeframe%20analysis%20section"><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradingWebSim - Advanced Multi-Timeframe GPT Trading Desk</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr) 300px;
+            grid-template-rows: auto repeat(2, 1fr);
+            height: 100vh;
+            gap: 10px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .header {
+            grid-column: 1 / -1;
+            background-color: #2962ff;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chart-container {
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+        }
+        .chart-header {
+            background-color: #f1f3f6;
+            padding: 5px 10px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .sidebar {
+            grid-row: 2 / span 2;
+            grid-column: 4;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+        }
+        .widget {
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 10px;
+        }
+        .btn {
+            padding: 5px 10px;
+            background-color: #2962ff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .btn:hover {
+            background-color: #1e4bd8;
+        }
+        #gpt-query {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        #gpt-response {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .relevant-data {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        .relevant-data strong {
+            color: #2962ff;
+        }
+        #symbol-input {
+            padding: 5px;
+            font-size: 14px;
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Advanced Multi-Timeframe GPT Trading Desk</h1>
+            <div>
+                <input type="text" id="symbol-input" placeholder="Enter ticker">
+                <button class="btn" id="update-symbol">Update</button>
+            </div>
+        </header>
+        <div class="chart-container">
+            <div class="chart-header">AAPL - 1 Minute</div>
+            <div id="chart1"></div>
+        </div>
+        <div class="chart-container">
+            <div class="chart-header">AAPL - 15 Minutes</div>
+            <div id="chart2"></div>
+        </div>
+        <div class="chart-container">
+            <div class="chart-header">AAPL - 1 Hour</div>
+            <div id="chart3"></div>
+        </div>
+        <div class="chart-container">
+            <div class="chart-header">AAPL - 4 Hours</div>
+            <div id="chart4"></div>
+        </div>
+        <div class="chart-container">
+            <div class="chart-header">AAPL - 1 Day</div>
+            <div id="chart5"></div>
+        </div>
+        <div class="chart-container">
+            <div class="chart-header">AAPL - 1 Week</div>
+            <div id="chart6"></div>
+        </div>
+        <aside class="sidebar">
+            <div class="widget">
+                <h3>Relevant Instrument Data</h3>
+                <div id="relevant-data"></div>
+            </div>
+            <div class="widget">
+                <h3>GPT Trading Assistant</h3>
+                <input type="text" id="gpt-query" placeholder="Ask about trading...">
+                <button class="btn" id="ask-gpt">Ask GPT</button>
+                <div id="gpt-response"></div>
+            </div>
+        </aside>
+    </div>
+
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <script type="text/javascript">
+    let currentSymbol = "AAPL";
+    const timeframes = ["1", "15", "60", "240", "D", "W"];
+    const timeframeNames = ["1 Minute", "15 Minutes", "1 Hour", "4 Hours", "1 Day", "1 Week"];
+    
+    function createTradingViewWidget(containerId, symbol, interval, timeframeName) {
+        new TradingView.widget({
+            "width": "100%",
+            "height": "100%",
+            "symbol": symbol,
+            "interval": interval,
+            "timezone": "Etc/UTC",
+            "theme": "light",
+            "style": "1",
+            "locale": "en",
+            "toolbar_bg": "#f1f3f6",
+            "enable_publishing": false,
+            "hide_top_toolbar": true,
+            "hide_legend": true,
+            "save_image": false,
+            "container_id": containerId,
+            "studies": ["RSI@tv-basicstudies"],
+            "studies_overrides": {
+                "rsi.rsi.color": "#2962FF",
+                "rsi.rsi.linewidth": 2
+            },
+            "overrides": {
+                "paneProperties.background": "#ffffff",
+                "paneProperties.vertGridProperties.color": "#e6e6e6",
+                "paneProperties.horzGridProperties.color": "#e6e6e6",
+                "symbolWatermarkProperties.transparency": 90,
+                "scalesProperties.textColor": "#333",
+                "mainSeriesProperties.candleStyle.upColor": "#26a69a",
+                "mainSeriesProperties.candleStyle.downColor": "#ef5350",
+                "mainSeriesProperties.candleStyle.drawWick": true,
+                "mainSeriesProperties.candleStyle.drawBorder": true,
+                "mainSeriesProperties.candleStyle.borderUpColor": "#26a69a",
+                "mainSeriesProperties.candleStyle.borderDownColor": "#ef5350",
+                "mainSeriesProperties.candleStyle.wickUpColor": "#26a69a",
+                "mainSeriesProperties.candleStyle.wickDownColor": "#ef5350"
+            }
+        });
+        document.querySelector(`#${containerId}`).closest('.chart-container').querySelector('.chart-header').textContent = `${symbol} - ${timeframeName}`;
+    }
+
+    function updateCharts(symbol) {
+        for (let i = 0; i < 6; i++) {
+            createTradingViewWidget(`chart${i+1}`, symbol, timeframes[i], timeframeNames[i]);
+        }
+        updateRelevantData(symbol);
+    }
+
+    function updateRelevantData(symbol) {
+        const relevantDataDiv = document.getElementById('relevant-data');
+        let relevantData = `
+            <div class="relevant-data"><strong>Symbol:</strong> ${symbol}</div>
+            <div class="relevant-data"><strong>NASDAQ:</strong> 14,020.30 (+0.7%)</div>
+            <div class="relevant-data"><strong>S&P 500:</strong> 4,185.25 (+0.5%)</div>
+            <div class="relevant-data"><strong>VIX:</strong> 16.25 (-3.2%)</div>
+            <div class="relevant-data"><strong>Sector Performance:</strong> +1.2%</div>
+            <div class="relevant-data"><strong>52 Week High:</strong> $XXX.XX</div>
+            <div class="relevant-data"><strong>52 Week Low:</strong> $XX.XX</div>
+            <div class="relevant-data"><strong>P/E Ratio:</strong> XX.X</div>
+            <div class="relevant-data"><strong>Dividend Yield:</strong> X.XX%</div>
+            <div class="relevant-data"><strong>Market Cap:</strong> $XX.XB</div>
+        `;
+        relevantDataDiv.innerHTML = relevantData;
+    }
+
+    updateCharts(currentSymbol);
+
+    document.getElementById('update-symbol').addEventListener('click', function() {
+        const symbolInput = document.getElementById('symbol-input');
+        currentSymbol = symbolInput.value.toUpperCase();
+        updateCharts(currentSymbol);
+    });
+
+    document.getElementById('ask-gpt').addEventListener('click', function() {
+        const query = document.getElementById('gpt-query').value;
+        const responseDiv = document.getElementById('gpt-response');
+        responseDiv.innerHTML = '<p>Analyzing RSI divergences and your query...</p>';
+        
+        setTimeout(() => {
+            const gptResponses = [
+                "The multi-timeframe RSI divergence analysis for " + currentSymbol + " reveals conflicting signals. While the 15m and 1W charts show bullish divergences, the 1h and 1D charts display bearish divergences. This suggests a complex market structure with potential reversals at different scales. Consider using these divergences to time entries and exits, but be mindful of larger timeframe trends.",
+                "For " + currentSymbol + ", the presence of a strong bearish RSI divergence on the 1h chart, coupled with a potential hidden bullish divergence on the weekly chart, indicates a possible short-term pullback within a broader bullish trend. This scenario often presents good buying opportunities. Look for price action confirmation on the 15m chart before entering any trades.",
+                "The long-term bearish RSI divergence on the daily chart for " + currentSymbol + " is a significant warning sign for bulls. However, the bullish divergence forming on the 15m timeframe suggests a potential short-term upward move. This conflict between timeframes often leads to increased volatility. Consider using options strategies to capitalize on potential large price swings.",
+                "For " + currentSymbol + ", the lack of clear RSI divergences on the 1m and 4h charts, combined with conflicting signals on other timeframes, suggests a market in equilibrium. This often precedes a significant move. Monitor volume across all timeframes for potential breakout signals and be prepared for increased volatility.",
+                "The multi-timeframe RSI divergence analysis for " + currentSymbol + " highlights the fractal nature of markets. The bearish divergence on the 1h chart is mirrored on the daily chart, while bullish divergences appear on the 15m and weekly charts. This pattern suggests that the current market structure is repeating across different timeframes. Look for alignment of these divergences as a potential trigger for a strong directional move."
+            ];
+            const randomResponse = gptResponses[Math.floor(Math.random() * gptResponses.length)];
+            responseDiv.innerHTML = `<p><strong>GPT Assistant:</strong> ${randomResponse}</p>`;
+        }, 2000);
+    });
+    </script>
+</body>
+</html>
+</head></html>
